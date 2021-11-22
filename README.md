@@ -6,7 +6,8 @@ if you want to use the program more than once, you will have to decrypt the file
   How do i decrypt the file??
 
 Open a terminal, and use the following command:
-       gpg --decrypt /path/to/file.txt.asc> /file/uncriptted/fileuncriptted.txt
+
+    gpg --decrypt /path/to/file.txt.asc> /file/uncriptted/fileuncriptted.txt
 
 
 It's all!
