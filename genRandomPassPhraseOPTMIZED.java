@@ -132,14 +132,14 @@ public class genRandomPassPhraseOPTMIZED {
     }
 
     public static String verifyUserData(){
-        Scanner sx1 = new Scanner(System.in);
+        Scanner sx = new Scanner(System.in);
 
         System.out.println("Por favor, informe seu email: ");
 
-            String mail = sx1.next();
-            sx1.nextLine();
+            String mail = sx.next();
+            sx.nextLine();
 
-        sx1.close();
+
         return mail;
     }
 
@@ -147,8 +147,8 @@ public class genRandomPassPhraseOPTMIZED {
         try {
             String[] genPGPkey = {"/usr/bin/gpg", "--full-generate-key"};
             Process proc3 = new ProcessBuilder(genPGPkey).start();
-
-            TimeUnit.MINUTES.sleep(5);
+            proc3.waitFor();
+//            TimeUnit.MINUTES.sleep(5);
 
         }catch(IOException ioe){
 
@@ -159,8 +159,8 @@ public class genRandomPassPhraseOPTMIZED {
         try{
             String[] genRevocationCrtFile = {"/usr/bin/gpg", "--output", "/revocation.crt", "--gen-revoke", verifyUserData()};
             Process proc4 = new ProcessBuilder(genRevocationCrtFile).start();
-
-            TimeUnit.MINUTES.sleep(5);
+            proc4.waitFor();
+//            TimeUnit.MINUTES.sleep(5);
 
         }catch(IOException | InterruptedException ioe1){
             log.severe(ioe1.getMessage());
@@ -178,14 +178,30 @@ public class genRandomPassPhraseOPTMIZED {
 
     public static void encript(String file, String mail){
         try {
-            String[] argsForGPG = {"/usr/bin/gpg", "--encypt", "--sign", "--armor", "-r", mail, file};
-            Process proc = new ProcessBuilder(argsForGPG).start();
+//            String[] argsForGPG = {"/usr/bin/gpg", "--encrypt", "--sign", "--armor", "-r", mail, file};
+            String[] argsForGPG = {"/usr/bin/gpg", "--encrypt", "--sign", "--armor", "-r", mail, file};
 
-            TimeUnit.MILLISECONDS.sleep(5);
+            Process proc = Runtime.getRuntime().exec(argsForGPG);
+            proc.waitFor();
+//            TimeUnit.MILLISECONDS.sleep(5);
 
         }catch(IOException | InterruptedException ioe){
             log.severe(ioe.getMessage());
 
+        }
+    }
+
+    public static void rmNonEncripttedFile(String mail){
+        String[] rm = {"/usr/bin/rm", mail};
+
+        try {
+            Process proc5 = new ProcessBuilder(rm).start();
+            proc5.waitFor();
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -195,10 +211,15 @@ public class genRandomPassPhraseOPTMIZED {
         System.out.println("Voce ja possui uma PGP key, um USER-ID, um arquivo revocation.crt e permissoes apenas para voce desse arquivo revocation.crt? [y/N]");
 
            String yn = sx.next();
-        String mail1 = " ";
+
+        String mail1 = verifyUserData();
+
         if(yn.equals("N")){
             genUserPGPandProtocols();
         }
+        sx.nextLine();
+
+
 
         System.out.println("Selecione um arquivo para guardar e criptografar suas senhas: [digite o caminho completo] ");
 
@@ -224,7 +245,7 @@ public class genRandomPassPhraseOPTMIZED {
         System.out.println(pssphrs);
 
         exportToTxt(exportToString(pssphrs), file);
-//        encript(file, mail1);
+        encript(file, mail1);
 
         System.out.println("Aviso: o arquivo com suas senhas foi criptografado e o original excluido, para que este programa funcione corretamente uma segunda vez voce tera que descriptografar o arquivo");
     }
